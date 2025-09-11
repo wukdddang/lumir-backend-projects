@@ -1,0 +1,182 @@
+# Context Module Rules
+
+## 1. 함수명 작성 원칙
+
+- **컨텍스트 내 모든 함수명은 반드시 "~ 한다" 문구로 한글로 작성**해야 합니다.
+- 함수명만 보고도 해당 함수의 역할과 동작을 쉽게 유추할 수 있어야 합니다.
+- 동사+명사 형태로, 구체적인 동작과 대상을 모두 포함하도록 작성합니다.
+- 함수명은 "~한다" 형태로 끝나야 합니다.
+- **띄어쓰기는 반드시 `_`(언더스코어)로 대체**하여 작성합니다.
+
+### 예시:
+
+```typescript
+// 올바른 예시
+async 추천서_업로드용_PresignedUrl을_생성한다(applicantId: string, fileName: string) { ... }
+async 지원자_상세정보와_문서를_조회한다(applicantId: string) { ... }
+async 임시파일을_정리한다() { ... }
+async 메일전송_알림을_발송한다(userId: string) { ... }
+async 지원자_정보를_업데이트한다(applicantId: string, data: any) { ... }
+async 파일을_삭제한다(fileId: string) { ... }
+
+// 잘못된 예시
+async 추천서업로드용PresignedUrl을생성한다() { ... }  // 띄어쓰기 없음
+async 지원자상세정보와문서를조회한다() { ... }  // 띄어쓰기 없음
+async 추천서 업로드용 PresignedUrl을 생성한다() { ... }  // 공백 사용
+async createRecommendationPresignedUrl() { ... }  // 영어 사용
+```
+
+### 함수명 작성 가이드:
+
+- **업로드 관련**: `파일을_업로드한다`, `이미지를_업로드한다`, `문서_업로드용_URL을_생성한다`
+- **조회 관련**: `지원자를_조회한다`, `문서_목록을_조회한다`, `상세정보를_조회한다`
+- **처리 관련**: `데이터를_처리한다`, `파일을_변환한다`, `정보를_검증한다`
+- **전송 관련**: `알림을_발송한다`, `메일을_전송한다`, `SMS를_발송한다`
+- **정리 관련**: `임시파일을_정리한다`, `캐시를_정리한다`, `로그를_정리한다`
+- **생성 관련**: `계정을_생성한다`, `토큰을_생성한다`, `세션을_생성한다`
+- **수정 관련**: `정보를_수정한다`, `상태를_변경한다`, `설정을_업데이트한다`
+- **삭제 관련**: `파일을_삭제한다`, `데이터를_삭제한다`, `계정을_삭제한다`
+
+### 띄어쓰기 규칙:
+
+- **명사와 명사 사이**: `지원자_정보`, `문서_목록`, `파일_업로드`
+- **동사와 명사 사이**: `정보를_조회한다`, `파일을_삭제한다`, `데이터를_처리한다`
+- **형용사와 명사 사이**: `임시_파일`, `상세_정보`, `기본_설정`
+- **전치사와 명사 사이**: `업로드용_URL`, `조회용_쿼리`, `전송용_템플릿`
+
+## 2. 함수 주석 작성 원칙
+
+- **모든 함수에는 반드시 한글 주석을 작성**해야 합니다.
+- 주석에는 함수의 목적, 입력값, 반환값, 예외 상황(필요시) 등을 명확히 기술합니다.
+
+### 예시:
+
+```typescript
+/**
+ * 추천서 업로드를 위한 presigned URL을 생성합니다.
+ * @param applicantId 지원자 ID
+ * @param fileName 파일명
+ * @param contentType 파일 타입 (예: application/pdf)
+ * @param expirySeconds URL 만료 시간 (초, 기본값: 3600초)
+ * @returns presigned URL과 파일 키 정보
+ */
+async 추천서_업로드용_PresignedUrl을_생성한다(
+  applicantId: string,
+  fileName: string,
+  contentType: string,
+  expirySeconds: number = 3600,
+) {
+  // 함수 구현
+}
+```
+
+## 3. 컨텍스트 서비스 클래스 주석 작성 원칙
+
+- **클래스 파일에는 간단한 한글 설명만 작성**합니다.
+- 클래스의 상세한 역할, 사용법, 메서드 설명 등은 반드시 **별도의 인터페이스 파일을 생성**하여 해당 인터페이스에 JSDoc 또는 한글 주석으로 작성합니다.
+
+### 예시:
+
+```typescript
+// applicant-detail-document-context.service.ts
+// 지원자 상세 정보와 관련 문서를 함께 처리하는 컨텍스트 서비스
+export class ApplicantDetailDocumentContextService implements IApplicantDetailDocumentContextService { ... }
+
+// applicant-detail-document-context.interface.ts
+/**
+ * 지원자 상세 정보와 관련 문서를 함께 처리하는 컨텍스트 서비스의 역할과 메서드 정의
+ * - 지원자 정보 조회 시 관련 문서도 함께 가져오는 등의 비즈니스 로직을 담당
+ * @method 추천서_업로드용_PresignedUrl을_생성한다 추천서 업로드용 presigned URL 생성
+ * @method 지원자_상세정보와_문서를_조회한다 지원자 정보와 관련 문서 함께 조회
+ * ...
+ */
+export interface IApplicantDetailDocumentContextService { ... }
+```
+
+## 4. 컨텍스트 모듈 네이밍 규칙
+
+- **모듈 파일명**: `{도메인명}-{기능명}-context.module.ts`
+- **서비스 파일명**: `{도메인명}-{기능명}-context.service.ts`
+- **인터페이스 파일명**: `{도메인명}-{기능명}-context.interface.ts`
+
+### 예시:
+
+```
+applicant-detail-document-context.module.ts
+applicant-detail-document-context.service.ts
+applicant-detail-document-context.interface.ts
+```
+
+## 5. 예외 처리 원칙
+
+- **외부 서버 연결이 아닌 경우 try-catch를 사용하지 않습니다.**
+- 외부 서버 연결 시에만 try-catch를 사용하여 네트워크 오류, 타임아웃 등을 처리합니다.
+- 내부 로직에서는 NestJS의 기본 예외 처리 메커니즘을 활용합니다.
+
+### 외부 서버 연결 예시 (try-catch 사용):
+
+```typescript
+async 메일을_전송한다(userId: string, content: string) {
+  try {
+    // 외부 메일 서버 연결
+    const result = await this.mailService.send(userId, content);
+    return result;
+  } catch (error) {
+    this.logger.error(`메일 전송 실패: ${error.message}`);
+    throw new ServiceUnavailableException('메일 전송에 실패했습니다.');
+  }
+}
+
+async S3_파일을_업로드한다(file: Buffer, key: string) {
+  try {
+    // AWS S3 외부 서버 연결
+    const result = await this.s3Client.upload({
+      Bucket: this.bucketName,
+      Key: key,
+      Body: file,
+    }).promise();
+    return result;
+  } catch (error) {
+    this.logger.error(`S3 업로드 실패: ${error.message}`);
+    throw new ServiceUnavailableException('파일 업로드에 실패했습니다.');
+  }
+}
+```
+
+### 내부 로직 예시 (try-catch 사용하지 않음):
+
+```typescript
+async 지원자_정보를_조회한다(applicantId: string) {
+  // 내부 데이터베이스 조회 - try-catch 사용하지 않음
+  const applicant = await this.applicantService.findById(applicantId);
+
+  if (!applicant) {
+    throw new NotFoundException('지원자를 찾을 수 없습니다.');
+  }
+
+  return applicant;
+}
+
+async 지원자_정보를_업데이트한다(applicantId: string, data: any) {
+  // 내부 데이터베이스 업데이트 - try-catch 사용하지 않음
+  const result = await this.applicantService.update(applicantId, data);
+
+  if (!result) {
+    throw new BadRequestException('지원자 정보 업데이트에 실패했습니다.');
+  }
+
+  return result;
+}
+```
+
+### 외부 서버 연결 판단 기준:
+
+- **외부 서버 연결**: HTTP API 호출, 메일 서버, SMS 서버, S3, 외부 데이터베이스 등
+- **내부 로직**: 로컬 데이터베이스 조회/수정, 파일 시스템 접근, 메모리 내 데이터 처리 등
+
+---
+
+이 룰을 반드시 준수하여 컨텍스트 모듈의 함수명, 주석, 클래스/인터페이스 설명을 작성하세요.
+alwaysApply: true
+
+---

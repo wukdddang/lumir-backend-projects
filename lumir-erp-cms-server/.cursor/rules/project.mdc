@@ -1,0 +1,54 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+사내 CMS 백엔드 서버
+
+Nestjs 로 만들생각이야
+인증은 SSO 서버가 있어서 거기서 JWT 토큰을 검증하는 형식이 되게 해줘.
+그리고 메타데이터 서버가 있는데 거기에 부서 정보, 사원 정보들이 다 있어.
+그래서 사원이나 부서 정보는 거기서 가져오고, 우리는 id 값을 기반으로 해서 필요한 정보만 이 서버의 DB 에 저장해두려고 해
+API 요청해서 받을 수 있는 정보는 DB 에 저장하지 않는 식으로.
+그러고 sync 같은 기능을 둬서 주기적으로 퇴사한 사람들은 제거하는 방식으로 동작하게 해줘.
+
+1. 관리자 공지사항 관리
+
+2. 사용자 정보 저장 (탭 위치)
+
+3. 회사 소프트웨어 사용 현황
+
+예상 엔티티 ?
+
+enum NoticeState
+enum Priority
+enum Role
+
+- 공지사항 Notice
+
+  - 제목: string
+  - id: string
+  - 작성자: User
+  - 대상: Role[]
+  - 게시 기간: string
+  - 작성일: string
+  - 공지사항설명: string
+  - 상태: NoticeState
+  - 우선순위: Priority
+  - 등록일자: string
+  - 수정일자: string
+
+- 사용자 User
+
+  - id: string
+  - 현재 활성화된 탭: string[]
+
+- 소프트웨어 Software
+  - 이름: string
+  - id: string
+  - 등록일자: string
+  - 수정일자: string
+  - 관리자: User
+  - 금액: string
+  - 사용부서: Department

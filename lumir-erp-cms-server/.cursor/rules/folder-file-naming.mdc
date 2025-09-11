@@ -1,0 +1,463 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+
+# Folder and File Naming Rule for lumir-gavs-backend
+
+## 1. 프로젝트 구조 가이드 (Clean Architecture)
+
+### 전체 폴더 구조:
+
+```
+src/
+├── domains/          # 도메인 계층 (엔티티, 도메인 서비스)
+│   ├── user/         # 사용자 도메인
+│   │   ├── entities/
+│   │   │   └── user.entity.ts
+│   │   ├── user.module.ts (AppModule에 등록)
+│   │   └── user.service.ts
+│   ├── purchase-request/   # 구매 요청 도메인
+│   │   ├── entities/
+│   │   │   └── purchase-request.entity.ts
+│   │   ├── purchase-request.module.ts
+│   │   └── purchase-request.service.ts
+│   ├── purchase-quote/     # 견적서 도메인
+│   │   ├── entities/
+│   │   │   └── purchase-quote.entity.ts
+│   │   ├── purchase-quote.module.ts
+│   │   └── purchase-quote.service.ts
+│   ├── assigned-manager/   # 담당자 할당 도메인
+│   │   ├── entities/
+│   │   │   └── assigned-manager.entity.ts
+│   │   ├── assigned-manager.module.ts
+│   │   └── assigned-manager.service.ts
+│   └── index.ts      # 도메인 엔티티 통합 export
+├── business/         # 비즈니스 계층 (UseCase, 비즈니스 로직)
+│   ├── business.module.ts  # 통합 비즈니스 모듈 (모든 Business를 provider로 관리)
+│   ├── auth/         # 인증 비즈니스 로직
+│   │   ├── auth.business.ts
+│   │   └── auth.interface.ts
+│   ├── jwt/          # JWT 비즈니스 로직
+│   │   ├── jwt.business.ts
+│   │   └── jwt.interface.ts
+│   ├── user/         # 사용자 비즈니스 로직
+│   │   ├── user.business.ts
+│   │   └── user.interface.ts
+│   ├── purchase-request/   # 구매 요청 비즈니스 로직
+│   │   ├── purchase-request.business.ts
+│   │   └── purchase-request.interface.ts
+│   ├── purchase-quote/     # 견적서 비즈니스 로직
+│   │   ├── purchase-quote.business.ts
+│   │   └── purchase-quote.interface.ts
+│   ├── employee-metadata/  # 직원 메타데이터 비즈니스 로직
+│   │   ├── employee-metadata.business.ts
+│   │   └── employee-metadata.interface.ts
+│   └── mail/         # 메일 비즈니스 로직
+│       ├── mail.business.ts
+│       └── mail.interface.ts
+├── contexts/         # 컨텍스트 계층 (복합 서비스, 외부 연동)
+│   ├── purchase-request-auto-assignment/ # 구매 요청 자동 할당 컨텍스트
+│   │   ├── purchase-request-auto-assignment-context.service.ts
+│   │   ├── purchase-request-auto-assignment-context.interface.ts
+│   │   └── purchase-request-auto-assignment-context.module.ts
+│   ├── purchase-request-quote/ # 구매 요청-견적서 연동 컨텍스트
+│   │   ├── purchase-request-quote-context.service.ts
+│   │   ├── purchase-request-quote-context.interface.ts
+│   │   └── purchase-request-quote-context.module.ts
+│   └── context.mdc   # 컨텍스트 계층 개발 규칙
+├── interfaces/       # 인터페이스 계층 (컨트롤러, DTO)
+│   └── web/          # 웹 인터페이스 (mdc 규칙 준수)
+│       ├── admin/    # 관리자용 컨트롤러 및 DTO
+│       │   ├── controllers/
+│       │   │   ├── purchase-request-admin.controller.ts
+│       │   │   ├── purchase-quote-admin.controller.ts
+│       │   │   └── purchase-quote-manager.controller.ts
+│       │   ├── dto/
+│       │   │   ├── purchase-request-admin.dto.ts
+│       │   │   ├── purchase-quote-admin.dto.ts
+│       │   │   └── purchase-quote-manager.dto.ts
+│       │   └── web-admin.module.ts
+│       ├── user/     # 사용자용 컨트롤러 및 DTO
+│       │   ├── controllers/
+│       │   │   └── purchase-request-create.controller.ts
+│       │   ├── dto/
+│       │   │   └── purchase-request-create.dto.ts
+│       │   └── web-user.module.ts
+│       ├── common/   # 공통 웹 컨트롤러 (인증, 사용자 관리)
+│       │   ├── controllers/
+│       │   │   ├── auth.controller.ts
+│       │   │   └── user.controller.ts
+│       │   ├── dto/
+│       │   │   ├── auth.dto.ts
+│       │   │   └── user.dto.ts
+│       │   └── web-common.module.ts
+│       └── web.module.ts
+├── common/           # 공통 유틸리티
+│   ├── guards/       # 가드 (JWT, 역할 기반 인증)
+│   │   ├── jwt.guard.ts
+│   │   └── roles.guard.ts
+│   ├── decorators/   # 커스텀 데코레이터
+│   │   ├── current-user.decorator.ts
+│   │   ├── public.decorator.ts
+│   │   └── roles.decorator.ts
+│   ├── filters/      # 필터
+│   │   └── http-exception.filter.ts
+│   ├── modules/      # 설정 모듈들
+│   │   ├── app.config.ts
+│   │   ├── config.module.ts
+│   │   ├── database.module.ts
+│   │   └── env-validation.schema.ts
+│   ├── services/     # 공통 서비스
+│   │   └── bootstrap.service.ts
+│   └── interfaces/   # 공통 인터페이스
+│       └── employee-metadata.interface.ts
+└── main.ts           # 애플리케이션 진입점
+```
+
+### 기타 프로젝트 폴더:
+
+- `test/` : 테스트 코드 (E2E 테스트)
+- `tsconfig.json`, `tsconfig.build.json` : TypeScript 설정
+- `package.json`, `pnpm-lock.yaml` : 의존성 관리
+- `docker-compose.yml` : Docker 설정
+- `README.md`, `ARCHITECTURE_DIAGRAMS.md` : 프로젝트 문서
+
+## 2. 파일 네이밍 규칙
+
+### 도메인 계층 (src/domains/):
+
+- 엔티티: `entities/{도메인명}.entity.ts` (ex: `entities/user.entity.ts`, `entities/purchase-request.entity.ts`)
+- 서비스: `{도메인명}.service.ts` (ex: `user.service.ts`, `purchase-request.service.ts`)
+- 모듈: `{도메인명}.module.ts` (ex: `user.module.ts`, `purchase-quote.module.ts`)
+- 통합 엔티티: `index.ts` (모든 도메인 엔티티를 export)
+
+### 비즈니스 계층 (src/business/):
+
+- 비즈니스 서비스: `{도메인명}.business.ts` (ex: `user.business.ts`, `purchase-request.business.ts`)
+- 인터페이스: `{도메인명}.interface.ts` (ex: `auth.interface.ts`, `purchase-quote.interface.ts`)
+- 통합 모듈: `business.module.ts` (모든 Business 클래스를 provider로 관리)
+
+### 인터페이스 계층 (src/interfaces/web/):
+
+- 컨트롤러: `controllers/{기능명}.controller.ts` (ex: `purchase-request-admin.controller.ts`, `auth.controller.ts`)
+- DTO: `dto/{기능명}.dto.ts` (ex: `purchase-request-admin.dto.ts`, `auth.dto.ts`)
+- 모듈: `web-{영역}.module.ts` (ex: `web-admin.module.ts`, `web-user.module.ts`, `web-common.module.ts`)
+- 통합 모듈: `web.module.ts` (모든 Web 모듈을 통합)
+
+### 컨텍스트 계층 (src/contexts/):
+
+- 서비스: `{도메인명}-{기능명}-context.service.ts` (ex: `purchase-request-auto-assignment-context.service.ts`)
+- 인터페이스: `{도메인명}-{기능명}-context.interface.ts`
+- 모듈: `{도메인명}-{기능명}-context.module.ts`
+- 개발 규칙: `context.mdc` (컨텍스트 계층 개발 가이드)
+
+### 공통/유틸 (src/common/):
+
+- 가드: `guards/{기능명}.guard.ts` (ex: `jwt.guard.ts`, `roles.guard.ts`)
+- 데코레이터: `decorators/{기능명}.decorator.ts` (ex: `current-user.decorator.ts`, `public.decorator.ts`)
+- 필터: `filters/{기능명}.filter.ts` (ex: `http-exception.filter.ts`)
+- 모듈: `modules/{기능명}.ts` (ex: `app.config.ts`, `database.module.ts`)
+- 서비스: `services/{기능명}.service.ts` (ex: `bootstrap.service.ts`)
+- 인터페이스: `interfaces/{기능명}.interface.ts` (ex: `employee-metadata.interface.ts`)
+
+### 테스트:
+
+- 단위 테스트: `*.spec.ts` (ex: `applicant.service.spec.ts`)
+- 통합 테스트: `*.integration.spec.ts` (ex: `mail.business.integration.spec.ts`)
+- E2E 테스트: `*.e2e-spec.ts` (ex: `application-document-migration.e2e-spec.ts`)
+
+## 3. 클래스 네이밍 규칙
+
+- 파일 네이밍과 반드시 일치해야 하며, 각 계층별 접미사를 클래스명에도 동일하게 붙입니다.
+- 클래스명은 PascalCase를 사용하고, 파일명의 하이픈(-)은 제거하여 작성합니다.
+
+### 예시:
+
+#### 도메인 계층:
+
+- `UserEntity` (파일: `user.entity.ts`)
+- `PurchaseRequestEntity` (파일: `purchase-request.entity.ts`)
+- `PurchaseQuoteEntity` (파일: `purchase-quote.entity.ts`)
+- `UserService` (파일: `user.service.ts`)
+- `PurchaseRequestModule` (파일: `purchase-request.module.ts`)
+
+#### 비즈니스 계층:
+
+- `UserBusiness` (파일: `user.business.ts`)
+- `PurchaseRequestBusiness` (파일: `purchase-request.business.ts`)
+- `AuthInterface` (파일: `auth.interface.ts`)
+- `BusinessModule` (파일: `business.module.ts`)
+
+#### 인터페이스 계층:
+
+- `PurchaseRequestAdminController` (파일: `purchase-request-admin.controller.ts`)
+- `PurchaseQuoteManagerController` (파일: `purchase-quote-manager.controller.ts`)
+- `AuthController` (파일: `auth.controller.ts`)
+- `PurchaseRequestAdminDto` (파일: `purchase-request-admin.dto.ts`)
+- `WebAdminModule` (파일: `web-admin.module.ts`)
+
+#### 컨텍스트 계층:
+
+- `PurchaseRequestAutoAssignmentContextService` (파일: `purchase-request-auto-assignment-context.service.ts`)
+- `PurchaseRequestQuoteContextService` (파일: `purchase-request-quote-context.service.ts`)
+- `PurchaseRequestAutoAssignmentContextModule` (파일: `purchase-request-auto-assignment-context.module.ts`)
+
+#### 공통 계층:
+
+- `JwtGuard` (파일: `jwt.guard.ts`)
+- `RolesGuard` (파일: `roles.guard.ts`)
+- `CurrentUserDecorator` (파일: `current-user.decorator.ts`)
+- `HttpExceptionFilter` (파일: `http-exception.filter.ts`)
+
+## 4. Clean Architecture 계층별 역할 및 의존성 규칙
+
+### 계층별 역할:
+
+#### 1️⃣ **Interface Layer** (src/interfaces/)
+
+- **역할**: HTTP 요청/응답 처리, 입출력 데이터 검증 및 변환
+- **구성요소**: Controllers, DTOs, Guards
+- **호출 방향**: **Client → Interface Layer**
+
+#### 2️⃣ **Business Layer** (src/business/)
+
+- **역할**: 단일 도메인 비즈니스 로직, UseCase 구현
+- **구성요소**: Business Services, Interfaces, 통합 BusinessModule
+- **모듈 구조**: 단일 BusinessModule에서 모든 Business 클래스들을 provider로 관리
+- **의존성 주입**: 컨트롤러에서 필요한 Business 클래스를 직접 주입받아 사용
+- **Context 호출**: 복합 프로세스가 필요한 경우 Context Layer 호출
+- **호출 방향**: **Interface → Business Layer**
+
+#### 3️⃣ **Context Layer** (src/contexts/)
+
+- **역할**: 여러 도메인을 조합한 복합 서비스, 외부 시스템 연동
+- **특징**: 함수명은 한글로 "~한다" 형태 (예: `알림을_발송한다()`)
+- **예외 처리**: 외부 서버 연결시에만 try-catch 사용
+- **의존성**: Domain Repository를 직접 사용 (Business Layer 의존 없음)
+- **호출 방향**: **Business → Context Layer**
+
+#### 4️⃣ **Domain Layer** (src/domains/)
+
+- **역할**: 엔티티, 도메인 규칙, 데이터 접근 추상화
+- **구성요소**: Domain Entities, Domain Services, Repositories
+- **모듈 구성**: 각 도메인별로 독립적인 모듈 구성
+- **엔티티 등록**: `domains/index.ts`에서 통합 export → AppModule에서 TypeORM 등록
+- **호출 방향**: **Business/Context → Domain Layer**
+
+### Clean Architecture 의존성 규칙:
+
+```
+외부 클라이언트 → Interface → Business → Context → Domain → Database
+```
+
+#### 기본 의존성 방향:
+
+- **하위 계층**은 **상위 계층**을 의존하지 않음
+- **상위 계층**만 **하위 계층**을 호출 가능
+- **Context Layer**는 Domain Repository를 직접 사용 (Business Layer 의존 없음)
+- **Business Layer**에서 복합 프로세스 시 Context Layer 호출
+- **Interface**를 통한 의존성 역전 적용
+
+#### ✅ 허용되는 의존성 패턴:
+
+##### 1. Business Layer 내부 의존성 (완전히 허용됨):
+
+```typescript
+// ✅ 같은 Business Layer 내에서의 의존성
+@Injectable()
+export class AuthBusiness implements IAuthBusiness {
+  constructor(
+    private jwtBusiness: JwtBusiness, // ✅ Business → Business
+    private userBusiness: UserBusiness, // ✅ Business → Business
+    private employeeMetadataBusiness: EmployeeMetadataBusiness, // ✅ Business → Business
+  ) {}
+
+  // 단일 유스케이스를 위한 여러 Business 클래스 협력
+  async getUserProfile(userId: string) {
+    const user = await this.userBusiness.findUserById(userId);
+    const employeeData = await this.employeeMetadataBusiness.getEmployeeById(
+      user.employeeId,
+    );
+    return { ...user, employeeMetadata: employeeData };
+  }
+}
+```
+
+**실제 사용 사례:**
+
+- `AuthBusiness` → `UserBusiness`, `JwtBusiness`, `EmployeeMetadataBusiness`
+- `PurchaseRequestBusiness` → `UserBusiness`
+- `PurchaseQuoteBusiness` → `UserBusiness`
+
+##### 2. 상위 → 하위 계층 의존성:
+
+```typescript
+// ✅ Business → Context (복합 프로세스시)
+PurchaseRequestBusiness → PurchaseRequestAutoAssignmentContextService
+
+// ✅ Business → Domain
+UserBusiness → UserService (Domain)
+
+// ✅ Context → Domain (직접 Repository 사용)
+PurchaseRequestAutoAssignmentContextService → UserEntity Repository
+```
+
+#### ❌ 금지되는 의존성 패턴:
+
+```typescript
+// ❌ 역방향 의존성
+UserEntity → AuthBusiness              // Domain → Business (역방향)
+AuthController → UserService           // Interface → Domain (계층 건너뛰기)
+
+// ❌ Context가 Business에 의존
+PurchaseRequestAutoAssignmentContextService → PurchaseRequestBusiness
+```
+
+#### BusinessModule 통합 관리 패턴:
+
+모든 Business 클래스를 단일 BusinessModule에서 provider로 관리하여:
+
+- Business Layer 내부 의존성 주입 간소화
+- 관련 비즈니스 로직의 응집성 향상
+- Business Layer 전체의 테스트 용이성 확보
+- 의존성 방향 제어 및 Clean Architecture 원칙 준수
+
+### 호출 흐름:
+
+#### 간단한 조회 흐름 (Context Layer 없음):
+
+```
+Client → JwtGuard → RolesGuard → Controller → Business → Domain → Database
+```
+
+#### 복잡한 프로세스 흐름 (Context Layer 사용):
+
+```
+Client → Guards → Controller → Business → Context → Multiple Domains → Database + External Systems
+```
+
+### 모듈 패턴:
+
+- **@Global()**: Config 모듈만 전역으로 설정 (환경 변수 접근용)
+- **BusinessModule**: 모든 비즈니스 로직을 provider 형태로 통합 관리
+- **DI Container**: Constructor Injection 패턴
+- **Interface Segregation**: 계층별 인터페이스 분리
+
+## 5. Context 계층 특별 규칙
+
+### Context 계층 함수명 규칙:
+
+- 모든 함수명은 한글로 작성하며 "~한다" 형태로 종료
+- 띄어쓰기는 언더스코어(\_)로 대체
+- 외부 시스템 연동 시에만 try-catch 사용
+
+#### 실제 프로젝트 예시:
+
+##### PurchaseRequestAutoAssignmentContextService:
+
+- `구매_요청을_생성하고_담당자를_자동_할당한다()`
+- `담당자를_라운드_로빈으로_선택한다()`
+- `담당자에게_할당_알림을_전송한다()`
+- `관리자에게_담당자_부족_알림을_전송한다()`
+
+##### PurchaseRequestQuoteContextService:
+
+- `구매요청과_견적서를_함께_조회한다()`
+- `견적서_제출시_알림을_발송한다()`
+- `견적서_승인시_요청자에게_알림을_발송한다()`
+- `견적서_거절시_알림을_발송한다()`
+- `구매요청_완료_프로세스를_실행한다()`
+- `담당자_배정시_메일을_발송한다()`
+- `외부시스템에_구매정보를_동기화한다()`
+- `외부_메일_서버에_알림을_전송한다()`
+
+### 예외 처리 규칙:
+
+```typescript
+// ✅ 외부 서버 연결 - try-catch 사용
+async 외부시스템에서_직원정보를_조회한다(employeeId: string) {
+  try {
+    const response = await fetch(`${API_URL}/employees/${employeeId}`);
+    return await response.json();
+  } catch (error) {
+    this.logger.error(`외부 시스템 조회 실패: ${error.message}`);
+    throw new Error('외부 시스템에서 직원 정보를 조회할 수 없습니다.');
+  }
+}
+
+// ✅ 내부 로직 - try-catch 사용하지 않음
+async 구매요청과_견적서를_함께_조회한다(requestId: number) {
+  const purchaseRequest = await this.purchaseRequestService.findById(requestId);
+  if (!purchaseRequest) {
+    throw new NotFoundException('구매 요청을 찾을 수 없습니다.');
+  }
+  const purchaseQuote = await this.purchaseQuoteService.findByPurchaseRequestId(requestId);
+  return { purchaseRequest, purchaseQuote };
+}
+```
+
+## 6. 테스트 및 개발 컨벤션
+
+### 테스트 파일 규칙:
+
+- 단위 테스트: `*.spec.ts` (ex: `user.service.spec.ts`)
+- 통합 테스트: `*.integration.spec.ts` (ex: `mail.business.integration.spec.ts`)
+- E2E 테스트: `*.e2e-spec.ts` (ex: `app.e2e-spec.ts`)
+
+### 개발 컨벤션:
+
+- **Domain Layer**: `*.entity.ts`, `*.module.ts`, `*.service.ts`
+- **Business Layer**: `*.business.ts`, `*.interface.ts`, `business.module.ts` (통합 모듈)
+- **Interface Layer**: `*-admin.controller.ts`, `*-user.controller.ts`, `*.dto.ts`, `web-*.module.ts` (mdc 규칙 준수)
+- **Context Layer**: 함수명은 한글 "~한다" 형태 (예: `견적서_제출시_알림을_발송한다()`, `구매_요청을_생성하고_담당자를_자동_할당한다()`)
+
+### 도메인별 책임:
+
+- **User Domain**: 사용자, 인증, 권한 관리
+- **Purchase Request Domain**: 구매 요청 생성, 상태 관리
+- **Purchase Quote Domain**: 견적서 작성, 가격 계산, 승인 프로세스
+- **Assigned Manager Domain**: 담당자 배정, 할당 이력 관리
+
+### 모듈 구성 패턴:
+
+#### AppModule 구성:
+
+```typescript
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRoot({ entities: [...] }),
+    UserModule, // 유일하게 AppModule에 직접 등록되는 도메인 모듈
+    BusinessModule, // 모든 Business 클래스 통합
+    WebModule, // 모든 Web 인터페이스 통합
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: JwtGuard },
+  ],
+})
+```
+
+#### BusinessModule 구성:
+
+```typescript
+@Module({
+  imports: [
+    UserModule,
+    PurchaseRequestAutoAssignmentContextModule,
+    PurchaseRequestQuoteContextModule,
+    TypeOrmModule.forFeature([...]),
+  ],
+  providers: [
+    AuthBusiness, JwtBusiness, UserBusiness,
+    PurchaseRequestBusiness, PurchaseQuoteBusiness,
+    EmployeeMetadataBusiness, MailBusiness,
+  ],
+  exports: [/* 모든 Business 클래스들 */],
+})
+```
+
+---
+
+**이 룰을 반드시 준수하여 lumir-gavs-backend 프로젝트의 폴더/파일/클래스 네이밍을 작성하세요.**
